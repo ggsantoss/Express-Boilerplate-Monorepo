@@ -1,0 +1,288 @@
+openapi: 3.0.0
+info:
+  title: API de Autenticação e Usuários
+  version: 1.0.0
+tags:
+  - name: Auth
+    description: Endpoints para autenticação e gerenciamento de usuários
+paths:
+  /auth/register:
+    post:
+      summary: Cria um novo usuário
+      tags:
+        - Auth
+      requestBody:
+        description: Dados para criação de usuário
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - name
+                - email
+                - password
+              properties:
+                name:
+                  type: string
+                  example: João Silva
+                email:
+                  type: string
+                  format: email
+                  example: joao@example.com
+                password:
+                  type: string
+                  example: senha12345
+      responses:
+        "201":
+          description: Usuário criado com sucesso
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  message:
+                    type: string
+                  data:
+                    $ref: '#/components/schemas/User'
+        "400":
+          description: Dados inválidos
+
+  /auth/login:
+    post:
+      summary: Login do usuário
+      tags:
+        - Auth
+      requestBody:
+        description: Credenciais para login
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - email
+                - password
+              properties:
+                email:
+                  type: string
+                  format: email
+                  example: joao@example.com
+                password:
+                  type: string
+                  example: senha12345
+      responses:
+        "200":
+          description: Login realizado com sucesso
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  message:
+                    type: string
+                  user:
+                    $ref: '#/components/schemas/User'
+                  token:
+                    type: string
+                    description: Token JWT para autenticação
+        "400":
+          description: Credenciais inválidas
+
+  /auth/{id}:
+    get:
+      summary: Busca um usuário pelo ID
+      tags:
+        - Auth
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+          description: ID do usuário
+      responses:
+        "200":
+          description: Usuário encontrado
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    $ref: '#/components/schemas/User'
+        "400":
+          description: ID inválido
+        "404":
+          description: Usuário não encontrado
+    delete:
+      summary: Remove um usuário pelo ID
+      tags:
+        - Auth
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+          description: ID do usuário a ser removido
+      responses:
+        "204":
+          description: Usuário removido com sucesso (sem conteúdo)
+        "400":
+          description: ID inválido
+        "404":
+          description: Usuário não encontrado
+    put:
+      summary: Atualiza todos os dados do usuário pelo ID
+      tags:
+        - Auth
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+          description: ID do usuário
+      requestBody:
+        description: Dados completos para atualização do usuário
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - name
+                - email
+                - password
+              properties:
+                name:
+                  type: string
+                  example: João Silva Atualizado
+                email:
+                  type: string
+                  format: email
+                  example: joaoatualizado@example.com
+                password:
+                  type: string
+                  example: novaSenha123
+      responses:
+        "200":
+          description: Usuário atualizado com sucesso
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    $ref: '#/components/schemas/User'
+        "400":
+          description: Dados inválidos ou ID inválido
+        "404":
+          description: Usuário não encontrado
+    patch:
+      summary: Atualiza parcialmente os dados do usuário pelo ID
+      tags:
+        - Auth
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+          description: ID do usuário
+      requestBody:
+        description: Dados parciais para atualização do usuário (pelo menos um campo)
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                  example: João Silva Atualizado Parcialmente
+                email:
+                  type: string
+                  format: email
+                  example: joaoparcial@example.com
+                password:
+                  type: string
+                  example: senhaParcial123
+      responses:
+        "200":
+          description: Usuário atualizado parcialmente com sucesso
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    $ref: '#/components/schemas/User'
+        "400":
+          description: Dados inválidos ou ID inválido
+        "404":
+          description: Usuário não encontrado
+
+  /auth:
+    get:
+      summary: Lista usuários paginados
+      tags:
+        - Auth
+      parameters:
+        - in: query
+          name: limit
+          required: true
+          schema:
+            type: integer
+            minimum: 1
+          description: Número máximo de usuários retornados
+        - in: query
+          name: skip
+          required: true
+          schema:
+            type: integer
+            minimum: 0
+          description: Número de usuários a pular (offset)
+      responses:
+        "200":
+          description: Lista de usuários
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/User'
+        "400":
+          description: Parâmetros inválidos
+
+components:
+  schemas:
+    User:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 123
+        name:
+          type: string
+          example: João Silva
+        email:
+          type: string
+          format: email
+          example: joao@example.com
